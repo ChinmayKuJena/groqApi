@@ -11,33 +11,34 @@ export class UserController {
     private readonly groqService: GroqService
   ) {}
 
-  @Post()
-  async getGroqResponse(@Body() body: any): Promise<string> {
+  @Post('create-request')
+  async createUserRequest(@Body() body: any): Promise<string> {
     console.log('Received body:', body);
 
-    //  input 
+    // validate input
     if (!body || !body.email) {
       console.error('Invalid input: missing email or content.');
       throw new HttpException('Email and content are required.', HttpStatus.BAD_REQUEST);
     }
     
-    const { email, request ,username } = body;
+    const { email, request, username } = body;
     const userName = username ? username : 'Anonymous';
     console.log('Received email:', email);
     console.log('Received content:', request);
 
-    //  time for Groq service response
+    // time for Groq service response
     const startTime = Date.now(); 
     const chatCompletionResponse = await this.groqService.getChatCompletion(request);
     const endTime = Date.now(); 
 
-    //  response time
-    const responseTime = (endTime - startTime) + 'ms'; // time difference in milliseconds
+    //calculate response time
+    const responseTime = (endTime - startTime) + 'ms'; 
     console.log('Groq service response time:', responseTime);
-    console.log('Groq service response :', chatCompletionResponse);
+    console.log('Groq service response:', chatCompletionResponse);
 
+    //save the user request and response to the database
     await this.userService.saveUser(email, chatCompletionResponse, request, responseTime);
-
+    // small html template 
     const htmlContent = `
     <html>
       <body>
@@ -51,27 +52,26 @@ export class UserController {
         <p>Best regards, <br> Chinmay</p>
       </body>
     </html>
-  `;
-    const subject=`${request}`
+    `;
+    const subject = `${request}`;
     await this.emailService.sendEmail(email, subject, htmlContent);
-    return `Thanks! Please Check Email\nHere is Your Response \n${chatCompletionResponse}`;
+    return `Thanks! Please check your email. Here is your response: \n${chatCompletionResponse}`;
   }
 
-  @Get()
+  @Get('all-users')
   async getAllUsers(): Promise<any[]> {
     const users = await this.userService.getUsers();
-    // console.log('Users fetched:', users);
     return users;
   }
 
-  @Get(':id')
+  @Get('user/:id')
   async getUserById(@Param('id') id: number): Promise<any> {
     console.log('Fetching user with ID:', id);
     const user = await this.userService.getUserById(id);
-    // console.log('User fetched:', user);
     return user;
   }
-  @Get('email/:email')
+
+  @Get('user-by-email/:email')
   async getUserByEmail(@Param('email') email: string): Promise<any> {
     // Fetch user by email using the user service
     const user = await this.userService.getUserByEmail(email);

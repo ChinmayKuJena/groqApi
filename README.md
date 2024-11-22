@@ -23,11 +23,61 @@
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
 ## Description
-This is i implemented simple crud operations like add email ,content and requests , fetch details based on id's and emails.
-Also here i have implemented Email service where we will send the request response to user in email with a html template .
-<!-- [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository. -->
+This project implements a simple CRUD API with the following functionalities:
+1. **Create User Request**: Allows users to submit requests with their email and content, which are processed through Groq AI. The results are stored in the database and sent back to the user via email.
+2. **Get User By Email**: Retrieves user details based on their email address.
+3. **Get All Users**: Fetches a list of all users in the system.
+4. **Get User By ID**: Fetches user details by their unique ID.
 
+## Endpoints
 
+### POST `/users/create-request`
+- **Description**: This endpoint allows users to submit a request with their email, content, and an optional username. The content is processed by the Groq AI service, and the response is sent back to the user via email.
+- **Request Body**:
+    ```json
+    {
+      "email": "chinmay09jena@gmail.com",
+      "request": "What is the weather today?",
+      "username": "Chinmay"
+    }
+    ```
+- **Response**: 
+    - On success: `"Thanks! Please check your email. Here is your response: [Response from Groq AI]"`
+    - On error (missing email or content): `"Email and content are required."`
+
+### GET `/users/all-users`
+- **Description**: Fetches a list of all users in the table.
+- **Response**:
+    - Returns an array of users, each containing `id`, `email`, `content`, `request`, `response_time`, and `created_at`.
+
+### GET `/users/user/:id`
+- **Description**: Fetches user details based on the user's ID.
+- **Response**:
+    - Returns the user object with the specified `id`.
+
+### GET `/users/user-by-email/:email`
+- **Description**: Fetches user details based on their email address.
+- **Response**:
+    - Returns the user object for the given `email`. If no user is found, returns a `404` error.
+
+## Groq Endpoints
+
+### GET `/groq/usage`
+- **Description**: Fetches the usage data of Groq AI by sending a fixed request ("India") to Groq.
+- **Response**: Returns a string containing the response from the Groq AI for the fixed input.
+
+### GET `/groq/ask/:request`
+- **Description**: Sends a dynamic request (provided as the `request` parameter in the URL) to the Groq AI service.
+- **Example Request**: `/groq/ask/What is the capital of India?`
+- **Response**: Returns the Groq AI's response to the provided question.
+
+## Example Responses
+
+- **GET `/groq/usage`**: 
+  - `"Groq usage response for India"`
+  
+- **GET `/groq/ask/What is the capital of India?`**: 
+  - `"The capital of India is New Delhi."`
 ## Project setup
 
 ```bash
@@ -82,3 +132,11 @@ CREATE TABLE users1 (
     response_time INTERVAL,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+```
+
+## Need Help
+- Here i am fetching api and database config values from .env in config dir.
+- And the in different services using those config vatiables.
+- My Question is Should i directly pass env values in Service or config methods?
+- What is the Industry Approch?
+ 

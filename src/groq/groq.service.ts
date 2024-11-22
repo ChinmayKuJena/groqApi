@@ -17,12 +17,12 @@ export class GroqService {
       });
       return chatCompletion.choices[0]?.message?.content || '';
     }
-    async getChatCompletion1(message: string) {
+    async getChatCompletionUsage(message: string) {
       const chatCompletion = await this.groq.chat.completions.create({
         messages: [{ role: 'user', content: message }],
         model: 'llama3-8b-8192',
       });
-      return chatCompletion.usage.total_time;
+      return chatCompletion.usage;
     }
 
 }
